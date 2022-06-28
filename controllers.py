@@ -6,6 +6,10 @@ class Cube:
         self.animators = [StillAnimator((0,0,0)) for _ in range(64)]
         self.tals = tals_controller
 
+    def set_animator(self, i, anim):
+        assert(i >= 0 and i <= 63)
+        self.animators[i] = anim
+
     def animate(self, dt):
         for i, a in enumerate(self.animators):
             self.tals[i] = a.animate(dt)
