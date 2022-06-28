@@ -3,7 +3,7 @@
 
 class Cube:
     def __init__(self, tals_controller):
-        self.animators = [StillAnimator((255,0,0))] + [BlinkAnimator((255, 255, 255), (0, 0, 255)) for i in range(63)]
+        self.animators = [StillAnimator((0,0,0)) for _ in range(64)]
         self.tals = tals_controller
 
     def animate(self, dt):
