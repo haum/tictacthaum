@@ -4,10 +4,12 @@
 import time
 
 from controllers import Cube, BlinkAnimator, StillAnimator
+from legacy import TalController
 
 timestep = 1/30
 
-c = Cube()
+tc = TalController()
+c = Cube(tc)
 
 while True:
     time.sleep(timestep)

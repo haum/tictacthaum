@@ -1,13 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding:utf8 -*-
 
-from legacy import TalController
-
-
 class Cube:
-    def __init__(self):
+    def __init__(self, tals_controller):
         self.animators = [StillAnimator((255,0,0))] + [BlinkAnimator((255, 255, 255), (0, 0, 255)) for i in range(63)]
-        self.tals = TalController()
+        self.tals = tals_controller
 
     def animate(self, dt):
         for i, a in enumerate(self.animators):
