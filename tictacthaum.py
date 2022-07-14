@@ -21,7 +21,7 @@ timestep = 1/30
 
 tc = TalController()
 c = Cube(tc)
-ge = GameEngine()
+ge = GameEngine(c)
 
 c.set_animator(coord_3d_to_linear(3, 0, 0), StillAnimator((255, 0, 0)))
 c.set_animator(coord_3d_to_linear(0, 3, 0), StillAnimator((0, 255, 0)))
