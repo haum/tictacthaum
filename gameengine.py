@@ -69,7 +69,9 @@ class GameEngine:
         elif event.startswith(f'player{self.curplayer+1}:button:'):
             self.cube.set_animator(self.position[self.curplayer], StillAnimator(self.color_pos(self.position[self.curplayer])))
             btn = event[15:]
-            if btn == 'x+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dx=1)
+
+            if btn in ('show', 'show_x', 'show_y', 'show_z'): return self.change_state(self.process_show_xyz)
+            elif btn == 'x+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dx=1)
             elif btn == 'x-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dx=-1)
             elif btn == 'y+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dy=1)
             elif btn == 'y-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dy=-1)
@@ -93,6 +95,24 @@ class GameEngine:
                 self.curplayer = (self.curplayer + 1) & 1
                 self.change_state(self.process_end_game if win else self.process_playerN_plays)
 
+    def process_show_xyz(self, event):
+        def redraw(x_axis = False, y_axis = False, z_axis = False):
+            for i in range(64):
+                self.cube.set_animator(i, StillAnimator((0,0,0)))
+            x, y, z = coord_linear_to_3d(self.position[self.curplayer])
+            for i in range(4):
+                self.cube.set_animator(coord_3d_to_linear(i, y, z), BlinkAnimator((255, 0, 0)) if x_axis else StillAnimator((255, 0, 0)))
+                self.cube.set_animator(coord_3d_to_linear(x, i, z), BlinkAnimator((0, 255, 0)) if y_axis else StillAnimator((0, 255, 0)))
+                self.cube.set_animator(coord_3d_to_linear(x, y, i), BlinkAnimator((0, 0, 255)) if z_axis else StillAnimator((0, 0, 255)))
+            self.cube.set_animator(coord_3d_to_linear(x, y, z), BlinkAnimator(self.color_player(self.curplayer)))
+
+        if event == 'state:enter': redraw()
+        elif event == f'player{self.curplayer+1}:button:off': self.change_state(self.process_playerN_plays)
+        elif event == f'player{self.curplayer+1}:button:show_x': redraw(x_axis=True)
+        elif event == f'player{self.curplayer+1}:button:show_y': redraw(y_axis=True)
+        elif event == f'player{self.curplayer+1}:button:show_z': redraw(z_axis=True)
+        elif event == f'player{self.curplayer+1}:button:show': redraw()
+
     def process_end_game(self, event):
         if event == 'player1:button:valid' or event == 'player2:button:valid':
             self.reset_game()
@@ -108,6 +128,7 @@ class GameEngine:
             elif data == b'16': return 'y-'
             elif data == b'32': return 'z-'
             elif data == b'64': return 'cancel'
+            elif data == b'128': return 'show'
             elif data == b'256': return 'valid'
             elif data == b'129' or data == b'136': return 'show_x'
             elif data == b'130' or data == b'144': return 'show_y'
