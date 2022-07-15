@@ -1,35 +1,127 @@
+import itertools
 from controllers import BlinkAnimator, StillAnimator
-from utils import coord_3d_to_linear
-
-def position_change(pos, dp):
-    return (
-        (pos[0] + dp[0]) % 4,
-        (pos[1] + dp[1]) % 4,
-        (pos[2] + dp[2]) % 4
-    )
+from utils import coord_3d_to_linear, coord_linear_to_3d
 
 class GameEngine:
     def __init__(self, cube):
         self.cube = cube
-        self.position1 = (0, 0, 0)
-        for i in range(4):
-            for j in range(4):
-                for k in range(4):
-                    self.cube.set_animator(coord_3d_to_linear(i, j, k), StillAnimator((0, 0, 0)))
 
-    def process(self, event):
-        if event[0] == 'remote1' and event[1] != b'0':
-            self.cube.set_animator(coord_3d_to_linear(*self.position1), StillAnimator((0, 0, 0)))
-            if event[1] == b'1':
-                self.position1 = position_change(self.position1, (1, 0, 0))
-            elif event[1] == b'8':
-                self.position1 = position_change(self.position1, (-1, 0, 0))
-            if event[1] == b'2':
-                self.position1 = position_change(self.position1, (0, 1, 0))
-            elif event[1] == b'16':
-                self.position1 = position_change(self.position1, (0, -1, 0))
-            if event[1] == b'4':
-                self.position1 = position_change(self.position1, (0, 0, 1))
-            elif event[1] == b'32':
-                self.position1 = position_change(self.position1, (0, 0, -1))
-            self.cube.set_animator(coord_3d_to_linear(*self.position1), StillAnimator((255, 0, 255)))
+        self.winlines = []
+        for i, j in itertools.product(range(4), repeat=2):
+            self.winlines.append(tuple(coord_3d_to_linear(i,j,k) for k in range(4)))
+            self.winlines.append(tuple(coord_3d_to_linear(i,k,j) for k in range(4)))
+            self.winlines.append(tuple(coord_3d_to_linear(k,i,j) for k in range(4)))
+        for i in range(4):
+            self.winlines.append(tuple(coord_3d_to_linear(i,k,k) for k in range(4)))
+            self.winlines.append(tuple(coord_3d_to_linear(k,i,k) for k in range(4)))
+            self.winlines.append(tuple(coord_3d_to_linear(k,k,i) for k in range(4)))
+            self.winlines.append(tuple(coord_3d_to_linear(i,k,3-k) for k in range(4)))
+            self.winlines.append(tuple(coord_3d_to_linear(k,i,3-k) for k in range(4)))
+            self.winlines.append(tuple(coord_3d_to_linear(k,3-k,i) for k in range(4)))
+        self.winlines.append(tuple(coord_3d_to_linear(k,k,k) for k in range(4)))
+        self.winlines.append(tuple(coord_3d_to_linear(3-k,k,k) for k in range(4)))
+        self.winlines.append(tuple(coord_3d_to_linear(k,3-k,k) for k in range(4)))
+        self.winlines.append(tuple(coord_3d_to_linear(k,k,3-k) for k in range(4)))
+
+        self.reset_game()
+
+        self.state = lambda x: None # dummy
+        self.change_state(self.process_playerN_plays)
+
+    def reset_game(self):
+        self.position = [0, 0]
+        self.curplayer = 0
+        self.cubestate = [-1] * 64
+
+    def change_state(self, next_state):
+        self.state('state:exit')
+        self.state = next_state
+        self.state('state:enter')
+
+    def redraw_cube(self):
+        for p in range(64):
+            self.cube.set_animator(p, StillAnimator(self.color_pos(p)))
+
+    def color_pos(self, p):
+        return self.color_player(self.cubestate[p])
+
+    def color_player(self, p):
+        if p == 0: return (255, 255, 0)
+        elif p == 1: return (255, 0, 255)
+        return (0, 0, 0)
+
+    def position_change(self, pos, dx=0, dy=0, dz=0):
+        pos3d = coord_linear_to_3d(pos)
+        return coord_3d_to_linear(
+            (pos3d[0] + dx) % 4,
+            (pos3d[1] + dy) % 4,
+            (pos3d[2] + dz) % 4
+        )
+
+    def process_playerN_plays(self, event):
+        if event == 'state:enter':
+            self.redraw_cube()
+            if self.cubestate[self.position[self.curplayer]] == self.curplayer:
+                self.cube.set_animator(self.position[self.curplayer], BlinkAnimator((255, 255, 255), self.color_player(self.curplayer)))
+            else:
+                self.cube.set_animator(self.position[self.curplayer], BlinkAnimator(self.color_pos(self.position[self.curplayer]), self.color_player(self.curplayer)))
+
+        elif event.startswith(f'player{self.curplayer+1}:button:'):
+            self.cube.set_animator(self.position[self.curplayer], StillAnimator(self.color_pos(self.position[self.curplayer])))
+            btn = event[15:]
+            if btn == 'x+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dx=1)
+            elif btn == 'x-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dx=-1)
+            elif btn == 'y+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dy=1)
+            elif btn == 'y-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dy=-1)
+            elif btn == 'z+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dz=1)
+            elif btn == 'z-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dz=-1)
+            if self.cubestate[self.position[self.curplayer]] == self.curplayer:
+                self.cube.set_animator(self.position[self.curplayer], BlinkAnimator((255, 255, 255), self.color_player(self.curplayer)))
+            else:
+                self.cube.set_animator(self.position[self.curplayer], BlinkAnimator(self.color_pos(self.position[self.curplayer]), self.color_player(self.curplayer)))
+
+            if btn == 'valid' and self.cubestate[self.position[self.curplayer]] == -1:
+                self.cubestate[self.position[self.curplayer]] = self.curplayer
+                self.cube.set_animator(self.position[self.curplayer], StillAnimator(self.color_pos(self.position[self.curplayer])))
+                win = False
+                for l in self.winlines:
+                    v = self.cubestate[l[0]]
+                    if v != -1 and v == self.cubestate[l[1]] and v == self.cubestate[l[2]] and v == self.cubestate[l[3]]:
+                        win = True
+                        for p in l:
+                            self.cube.set_animator(p, BlinkAnimator(self.color_player(v)))
+                self.curplayer = (self.curplayer + 1) & 1
+                self.change_state(self.process_end_game if win else self.process_playerN_plays)
+
+    def process_end_game(self, event):
+        if event == 'player1:button:valid' or event == 'player2:button:valid':
+            self.reset_game()
+            self.change_state(self.process_playerN_plays)
+
+    def process(self, rawevent):
+        def button_name(data):
+            if data == b'0': return 'off'
+            elif data == b'1': return 'x+'
+            elif data == b'2': return 'y+'
+            elif data == b'4': return 'z+'
+            elif data == b'8': return 'x-'
+            elif data == b'16': return 'y-'
+            elif data == b'32': return 'z-'
+            elif data == b'64': return 'cancel'
+            elif data == b'256': return 'valid'
+            elif data == b'129' or data == b'136': return 'show_x'
+            elif data == b'130' or data == b'144': return 'show_y'
+            elif data == b'132' or data == b'160': return 'show_z'
+            return None
+
+        if rawevent[0] == 'remote1':
+            btn = button_name(rawevent[1])
+            if btn:
+                self.state('player1:button:'+btn)
+        if rawevent[0] == 'remote2':
+            btn = button_name(rawevent[1])
+            if btn:
+                self.state('player2:button:'+btn)
+        if rawevent[0] == 'console':
+            if rawevent[1]:
+                self.state(rawevent[1])

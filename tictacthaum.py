@@ -23,10 +23,6 @@ tc = TalController()
 c = Cube(tc)
 ge = GameEngine(c)
 
-c.set_animator(coord_3d_to_linear(3, 0, 0), StillAnimator((255, 0, 0)))
-c.set_animator(coord_3d_to_linear(0, 3, 0), StillAnimator((0, 255, 0)))
-c.set_animator(coord_3d_to_linear(0, 0, 3), StillAnimator((0, 0, 255)))
-
 r1 = None
 if args.remote1 != None:
     r1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
