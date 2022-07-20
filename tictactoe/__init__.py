@@ -40,6 +40,7 @@ class Game:
         self.cubestate = [-1] * 64
         self.curplayer = -1
         self.change_player(0)
+        self.ge.timer_add(0, 20)
 
     def redraw_cube(self):
         for p in range(64):
@@ -75,6 +76,12 @@ class Game:
             self.redraw_cube()
             self.set_blink(self.position[self.curplayer], self.curplayer)
 
+        elif event == 'timer:0':
+            self.set_blink(self.position[self.curplayer], None)
+            self.change_player()
+            self.set_blink(self.position[self.curplayer], self.curplayer)
+            self.ge.timer_add(0, 20)
+
         elif event.startswith(f'player{self.curplayer+1}:button:'):
             self.set_blink(self.position[self.curplayer], None)
             btn = event[15:]
@@ -99,6 +106,7 @@ class Game:
                         for p in l:
                             self.ge.cube.set_animator(p, BlinkAnimator(self.color_player(v)))
                 self.change_player()
+                self.ge.timer_add(0, 20)
                 self.ge.change_state(self.process_end_game if win else self.process_playerN_plays)
 
     def process_show_xyz(self, event):
