@@ -12,8 +12,9 @@ from gameengine import GameEngine
 from legacy import TalController
 
 parser = argparse.ArgumentParser(description='Tic Tac THaum')
-parser.add_argument('--remote1', help='Number of first remote')
-parser.add_argument('--remote2', help='Number of second remote')
+parser.add_argument('-r1', '--remote1', help='Number of first remote')
+parser.add_argument('-r2', '--remote2', help='Number of second remote')
+parser.add_argument('-g', '--game', default='tictactoe', help='Game name')
 args = parser.parse_args()
 
 timestep = 1/30
@@ -22,7 +23,7 @@ tc = TalController()
 c = Cube(tc)
 r1 = Remote(args.remote1)
 r2 = Remote(args.remote2)
-ge = GameEngine(c)
+ge = GameEngine(c, r1, r2, args.game)
 
 while True:
     time.sleep(timestep)
