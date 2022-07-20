@@ -26,10 +26,20 @@ class Game:
         self.reset_game()
         self.ge.change_state(self.process_playerN_plays)
 
+    def change_player(self, v=None):
+        if v == self.curplayer: return
+        if v is None: v = 1 - self.curplayer
+        self.curplayer = v
+        b = self.curplayer == 0
+        self.ge.r1.set_leds(b, b, b)
+        b = not b
+        self.ge.r2.set_leds(b, b, b)
+
     def reset_game(self):
         self.position = [0, 0]
-        self.curplayer = 0
         self.cubestate = [-1] * 64
+        self.curplayer = -1
+        self.change_player(0)
 
     def redraw_cube(self):
         for p in range(64):
@@ -85,7 +95,7 @@ class Game:
                         win = True
                         for p in l:
                             self.ge.cube.set_animator(p, BlinkAnimator(self.color_player(v)))
-                self.curplayer = (self.curplayer + 1) & 1
+                self.change_player()
                 self.ge.change_state(self.process_end_game if win else self.process_playerN_plays)
 
     def process_show_xyz(self, event):
