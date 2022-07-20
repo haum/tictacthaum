@@ -1,11 +1,14 @@
 import importlib
 import time
+from controllers import StillAnimator
+from utils import coord_3d_to_linear
 
 class GameEngine:
     def __init__(self, cube, r1, r2, game):
         self.cube = cube
         self.r1 = r1
         self.r2 = r2
+        self.game = game
         self.player_colors = [
             ((255, 0, 0), (127, 0, 0)),
             ((0, 255, 0), (0, 127, 0)),
@@ -16,12 +19,8 @@ class GameEngine:
         ]
         self.player_colors_sel = [3, 5]
         self._state = self.nullstate
+        self.change_state(self.process_config)
         self._timers = []
-        try:
-            mod = importlib.import_module(game)
-            self._game = mod.Game(self)
-        except ModuleNotFoundError:
-            print('Invalid game')
 
     def nullstate(self, event):
         pass
@@ -42,6 +41,45 @@ class GameEngine:
         if not p in (0, 1): return (0, 0, 0)
         c = self.player_colors_sel[p]
         return self.player_colors[c][mod]
+
+    def process_config(self, event):
+        def load_game():
+            try:
+                mod = importlib.import_module(self.game)
+                self._game = mod.Game(self)
+            except ModuleNotFoundError:
+                print('Invalid game')
+
+        def draw0():
+            for p in (coord_3d_to_linear(0, 0, 0), coord_3d_to_linear(1, 0, 0), coord_3d_to_linear(0, 1, 0), coord_3d_to_linear(0, 0, 1)):
+                self.cube.set_animator(p, StillAnimator(self.player_color(0)))
+
+        def draw1():
+            for p in (coord_3d_to_linear(3, 3, 3), coord_3d_to_linear(2, 3, 3), coord_3d_to_linear(3, 2, 3), coord_3d_to_linear(3, 3, 2)):
+                self.cube.set_animator(p, StillAnimator(self.player_color(1)))
+
+        if event == 'state:enter':
+            draw0()
+            draw1()
+
+        elif event == 'player1:valid' or event == 'player2:valid':
+            load_game()
+
+        elif event in ('player1:x+', 'player1:x-', 'player1:y+', 'player1:y-', 'player1:z+', 'player1:z-'):
+            self.player_colors_sel[0] += 1
+            self.player_colors_sel[0] %= len(self.player_colors)
+            if self.player_colors_sel[0] == self.player_colors_sel[1]:
+                self.player_colors_sel[0] += 1
+                self.player_colors_sel[0] %= len(self.player_colors)
+            draw0()
+
+        elif event in ('player2:x+', 'player2:x-', 'player2:y+', 'player2:y-', 'player2:z+', 'player2:z-'):
+            self.player_colors_sel[1] += 1
+            self.player_colors_sel[1] %= len(self.player_colors)
+            if self.player_colors_sel[1] == self.player_colors_sel[0]:
+                self.player_colors_sel[1] += 1
+                self.player_colors_sel[1] %= len(self.player_colors)
+            draw1()
 
     def process(self, rawevent):
         def button_name(data):
