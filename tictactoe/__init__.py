@@ -1,6 +1,6 @@
 import itertools
 from controllers import BlinkAnimator, StillAnimator
-from utils import coord_3d_to_linear, coord_linear_to_3d
+from utils import coord_3d_to_linear, coord_linear_to_3d, position_change
 
 class Game:
     def __init__(self, ge):
@@ -54,14 +54,6 @@ class Game:
         elif p == 1: return (255, 0, 255)
         return (0, 0, 0)
 
-    def position_change(self, pos, dx=0, dy=0, dz=0):
-        pos3d = coord_linear_to_3d(pos)
-        return coord_3d_to_linear(
-            (pos3d[0] + dx) % 4,
-            (pos3d[1] + dy) % 4,
-            (pos3d[2] + dz) % 4
-        )
-
     def set_blink(self, pos, player):
         if player is None:
             self.ge.cube.set_animator(pos, StillAnimator(self.color_pos(pos)))
@@ -87,12 +79,12 @@ class Game:
             btn = event[8:]
 
             if btn in ('show', 'show_x', 'show_y', 'show_z'): return self.ge.change_state(self.process_show_xyz)
-            elif btn == 'x+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dx=1)
-            elif btn == 'x-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dx=-1)
-            elif btn == 'y+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dy=1)
-            elif btn == 'y-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dy=-1)
-            elif btn == 'z+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dz=1)
-            elif btn == 'z-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dz=-1)
+            elif btn == 'x+': self.position[self.curplayer] = position_change(self.position[self.curplayer], dx=1)
+            elif btn == 'x-': self.position[self.curplayer] = position_change(self.position[self.curplayer], dx=-1)
+            elif btn == 'y+': self.position[self.curplayer] = position_change(self.position[self.curplayer], dy=1)
+            elif btn == 'y-': self.position[self.curplayer] = position_change(self.position[self.curplayer], dy=-1)
+            elif btn == 'z+': self.position[self.curplayer] = position_change(self.position[self.curplayer], dz=1)
+            elif btn == 'z-': self.position[self.curplayer] = position_change(self.position[self.curplayer], dz=-1)
             self.set_blink(self.position[self.curplayer], self.curplayer)
 
             if btn == 'valid' and self.cubestate[self.position[self.curplayer]] == -1:

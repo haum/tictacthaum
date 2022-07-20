@@ -11,3 +11,11 @@ def coord_linear_to_3d(n):
     assert(n >= 0 and n <= 63)
     pos = _assoc.index(n+1)
     return (pos//16, pos % 4, (pos % 16)//4)
+
+def position_change(pos, dx=0, dy=0, dz=0):
+    pos3d = coord_linear_to_3d(pos)
+    return coord_3d_to_linear(
+        (pos3d[0] + dx) % 4,
+        (pos3d[1] + dy) % 4,
+        (pos3d[2] + dz) % 4
+    )

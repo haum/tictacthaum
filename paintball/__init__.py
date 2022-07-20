@@ -1,5 +1,5 @@
 from controllers import BlinkAnimator, StillAnimator
-from utils import coord_3d_to_linear, coord_linear_to_3d
+from utils import coord_3d_to_linear, coord_linear_to_3d, position_change
 
 class Game:
     def __init__(self, ge):
@@ -22,23 +22,15 @@ class Game:
         elif p == 1: return (255, 0, 0)
         return (0, 0, 0)
 
-    def position_change(self, pos, dx=0, dy=0, dz=0):
-        pos3d = coord_linear_to_3d(pos)
-        return coord_3d_to_linear(
-            (pos3d[0] + dx) % 4,
-            (pos3d[1] + dy) % 4,
-            (pos3d[2] + dz) % 4
-        )
-
     def move(self, n, event):
         if event.startswith(f'player{n+1}:'):
             btn = event[8:]
-            if btn == 'x+': self.position[n] = self.position_change(self.position[n], dx=1)
-            elif btn == 'x-': self.position[n] = self.position_change(self.position[n], dx=-1)
-            elif btn == 'y+': self.position[n] = self.position_change(self.position[n], dy=1)
-            elif btn == 'y-': self.position[n] = self.position_change(self.position[n], dy=-1)
-            elif btn == 'z+': self.position[n] = self.position_change(self.position[n], dz=1)
-            elif btn == 'z-': self.position[n] = self.position_change(self.position[n], dz=-1)
+            if btn == 'x+': self.position[n] = position_change(self.position[n], dx=1)
+            elif btn == 'x-': self.position[n] = position_change(self.position[n], dx=-1)
+            elif btn == 'y+': self.position[n] = position_change(self.position[n], dy=1)
+            elif btn == 'y-': self.position[n] = position_change(self.position[n], dy=-1)
+            elif btn == 'z+': self.position[n] = position_change(self.position[n], dz=1)
+            elif btn == 'z-': self.position[n] = position_change(self.position[n], dz=-1)
             return True
         else:
             return False
