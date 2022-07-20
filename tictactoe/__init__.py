@@ -61,16 +61,22 @@ class Game:
             (pos3d[2] + dz) % 4
         )
 
+    def set_blink(self, pos, player):
+        if player is None:
+            self.ge.cube.set_animator(pos, StillAnimator(self.color_pos(pos)))
+        else:
+            if self.cubestate[pos] == player:
+                self.ge.cube.set_animator(pos, BlinkAnimator((255, 255, 255), self.color_player(player)))
+            else:
+                self.ge.cube.set_animator(pos, BlinkAnimator(self.color_pos(pos), self.color_player(player)))
+
     def process_playerN_plays(self, event):
         if event == 'state:enter':
             self.redraw_cube()
-            if self.cubestate[self.position[self.curplayer]] == self.curplayer:
-                self.ge.cube.set_animator(self.position[self.curplayer], BlinkAnimator((255, 255, 255), self.color_player(self.curplayer)))
-            else:
-                self.ge.cube.set_animator(self.position[self.curplayer], BlinkAnimator(self.color_pos(self.position[self.curplayer]), self.color_player(self.curplayer)))
+            self.set_blink(self.position[self.curplayer], self.curplayer)
 
         elif event.startswith(f'player{self.curplayer+1}:button:'):
-            self.ge.cube.set_animator(self.position[self.curplayer], StillAnimator(self.color_pos(self.position[self.curplayer])))
+            self.set_blink(self.position[self.curplayer], None)
             btn = event[15:]
 
             if btn in ('show', 'show_x', 'show_y', 'show_z'): return self.ge.change_state(self.process_show_xyz)
@@ -80,14 +86,11 @@ class Game:
             elif btn == 'y-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dy=-1)
             elif btn == 'z+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dz=1)
             elif btn == 'z-': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dz=-1)
-            if self.cubestate[self.position[self.curplayer]] == self.curplayer:
-                self.ge.cube.set_animator(self.position[self.curplayer], BlinkAnimator((255, 255, 255), self.color_player(self.curplayer)))
-            else:
-                self.ge.cube.set_animator(self.position[self.curplayer], BlinkAnimator(self.color_pos(self.position[self.curplayer]), self.color_player(self.curplayer)))
+            self.set_blink(self.position[self.curplayer], self.curplayer)
 
             if btn == 'valid' and self.cubestate[self.position[self.curplayer]] == -1:
                 self.cubestate[self.position[self.curplayer]] = self.curplayer
-                self.ge.cube.set_animator(self.position[self.curplayer], StillAnimator(self.color_pos(self.position[self.curplayer])))
+                self.set_blink(self.position[self.curplayer], None)
                 win = False
                 for l in self.winlines:
                     v = self.cubestate[l[0]]
