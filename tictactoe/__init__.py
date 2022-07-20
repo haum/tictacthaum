@@ -120,6 +120,10 @@ class Game:
         elif event == f'player{self.curplayer+1}:show': redraw()
 
     def process_end_game(self, event):
-        if event == 'player1:valid' or event == 'player2:valid':
+        if event == 'state:enter':
+            self.ge.r1.set_leds(False, False, False)
+            self.ge.r2.set_leds(False, False, False)
+
+        elif event == 'player1:valid' or event == 'player2:valid':
             self.reset_game()
             self.ge.change_state(self.process_playerN_plays)
