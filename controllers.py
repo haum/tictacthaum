@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding:utf8 -*-
 
+import socket
+
 class Cube:
     def __init__(self, tals_controller):
         self.animators = [StillAnimator((0,0,0)) for _ in range(64)]
@@ -15,6 +17,22 @@ class Cube:
             self.tals[i] = a.animate(dt)
         self.tals.leds.blit()
 
+class Remote:
+    def __init__(self, ip):
+        self.ip = ip
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) if ip else None
+        self.connect()
+
+    def connect(self):
+        if not self.s: return
+        self.s.connect((self.ip, 540))
+        self.s.recv(1000)
+
+    def fd(self):
+        return self.s
+
+    def get_events(self):
+        return self.s.recv(1000).strip().split() if self.s else []
 
 
 class BlinkAnimator:
