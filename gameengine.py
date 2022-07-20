@@ -1,4 +1,5 @@
 import importlib
+import time
 
 class GameEngine:
     def __init__(self, cube, r1, r2, game):
@@ -6,6 +7,7 @@ class GameEngine:
         self.r1 = r1
         self.r2 = r2
         self._state = self.nullstate
+        self._timers = []
         try:
             mod = importlib.import_module(game)
             self._game = mod.Game(self)
@@ -19,6 +21,13 @@ class GameEngine:
         self._state('state:exit')
         self._state = next_state
         self._state('state:enter')
+
+    def timer_add(self, n, t):
+        self.timer_rm(n)
+        self._timers.append((time.time()+t, n))
+
+    def timer_rm(self, n):
+        self._timers = [x for x in self._timers if x[1] != n]
 
     def process(self, rawevent):
         def button_name(data):
@@ -37,14 +46,24 @@ class GameEngine:
             elif data == b'132' or data == b'160': return 'show_y'
             return None
 
-        if rawevent[0] == 'remote1':
+        if rawevent[0] == 'tic':
+            now = time.time()
+            removable = False
+            for t, n in self._timers:
+                if t <= now:
+                    removable = True
+                    self._state(f'timer:{n}')
+            if removable:
+                self._timers = [x for x in self._timers if x[0] > now]
+
+        elif rawevent[0] == 'remote1':
             btn = button_name(rawevent[1])
             if btn:
                 self._state('player1:button:'+btn)
-        if rawevent[0] == 'remote2':
+        elif rawevent[0] == 'remote2':
             btn = button_name(rawevent[1])
             if btn:
                 self._state('player2:button:'+btn)
-        if rawevent[0] == 'console':
+        elif rawevent[0] == 'console':
             if rawevent[1]:
                 self._state(rawevent[1])

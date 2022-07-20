@@ -28,6 +28,7 @@ ge = GameEngine(c, r1, r2, args.game)
 while True:
     time.sleep(timestep)
     c.animate(timestep)
+    ge.process(('tic', ))
 
     toread = select.select([a for a in (sys.stdin, r1.fd(), r2.fd()) if a], [], [], 0)[0]
     if r1.fd() in toread:
