@@ -120,32 +120,3 @@ class Game:
         if event == 'player1:button:valid' or event == 'player2:button:valid':
             self.reset_game()
             self.ge.change_state(self.process_playerN_plays)
-
-    def process(self, rawevent):
-        def button_name(data):
-            if data == b'0': return 'off'
-            elif data == b'1': return 'x+'
-            elif data == b'2': return 'z+'
-            elif data == b'4': return 'y+'
-            elif data == b'8': return 'x-'
-            elif data == b'16': return 'z-'
-            elif data == b'32': return 'y-'
-            elif data == b'64': return 'cancel'
-            elif data == b'128': return 'show'
-            elif data == b'256': return 'valid'
-            elif data == b'129' or data == b'136': return 'show_x'
-            elif data == b'130' or data == b'144': return 'show_z'
-            elif data == b'132' or data == b'160': return 'show_y'
-            return None
-
-        if rawevent[0] == 'remote1':
-            btn = button_name(rawevent[1])
-            if btn:
-                self.state('player1:button:'+btn)
-        if rawevent[0] == 'remote2':
-            btn = button_name(rawevent[1])
-            if btn:
-                self.state('player2:button:'+btn)
-        if rawevent[0] == 'console':
-            if rawevent[1]:
-                self.state(rawevent[1])
