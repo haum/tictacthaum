@@ -14,14 +14,6 @@ class Game:
         self.cubestate[self.position[0]] = 0
         self.cubestate[self.position[1]] = 1
 
-    def color_pos(self, p):
-        return self.color_player(self.cubestate[p])
-
-    def color_player(self, p):
-        if p == 0: return (0, 255, 255)
-        elif p == 1: return (255, 0, 0)
-        return (0, 0, 0)
-
     def move(self, n, event):
         if event.startswith(f'player{n+1}:'):
             btn = event[8:]
@@ -39,7 +31,7 @@ class Game:
         if event == 'state:enter':
             self.ge.timer_add(0, 20)
             for i in range(64):
-                self.ge.cube.set_animator(i, StillAnimator(self.color_pos(i)))
+                self.ge.cube.set_animator(i, StillAnimator(self.ge.player_color(self.cubestate[i])))
 
         elif event == 'timer:0':
             c0 = self.cubestate.count(0)
@@ -47,19 +39,19 @@ class Game:
             if c0 >= c1:
                 for i in range(64):
                     if self.cubestate[i] == 0:
-                        self.ge.cube.set_animator(i, BlinkAnimator(self.color_player(0)))
+                        self.ge.cube.set_animator(i, BlinkAnimator(self.ge.player_color(0)))
             if c0 <= c1:
                 for i in range(64):
                     if self.cubestate[i] == 1:
-                        self.ge.cube.set_animator(i, BlinkAnimator(self.color_player(1)))
+                        self.ge.cube.set_animator(i, BlinkAnimator(self.ge.player_color(1)))
             self.ge.change_state(self.process_end_game)
 
         elif self.move(0, event):
-            self.ge.cube.set_animator(self.position[0], StillAnimator(self.color_player(0)))
+            self.ge.cube.set_animator(self.position[0], StillAnimator(self.ge.player_color(0)))
             self.cubestate[self.position[0]] = 0
 
         elif self.move(1, event):
-            self.ge.cube.set_animator(self.position[1], StillAnimator(self.color_player(1)))
+            self.ge.cube.set_animator(self.position[1], StillAnimator(self.ge.player_color(1)))
             self.cubestate[self.position[1]] = 1
 
     def process_end_game(self, event):

@@ -44,24 +44,16 @@ class Game:
 
     def redraw_cube(self):
         for p in range(64):
-            self.ge.cube.set_animator(p, StillAnimator(self.color_pos(p)))
-
-    def color_pos(self, p):
-        return self.color_player(self.cubestate[p])
-
-    def color_player(self, p):
-        if p == 0: return (255, 255, 0)
-        elif p == 1: return (255, 0, 255)
-        return (0, 0, 0)
+            self.set_blink(p, None)
 
     def set_blink(self, pos, player):
         if player is None:
-            self.ge.cube.set_animator(pos, StillAnimator(self.color_pos(pos)))
+            self.ge.cube.set_animator(pos, StillAnimator(self.ge.player_color(self.cubestate[pos])))
         else:
             if self.cubestate[pos] == player:
-                self.ge.cube.set_animator(pos, BlinkAnimator((255, 255, 255), self.color_player(player)))
+                self.ge.cube.set_animator(pos, BlinkAnimator(self.ge.player_color(player, True), self.ge.player_color(player)))
             else:
-                self.ge.cube.set_animator(pos, BlinkAnimator(self.color_pos(pos), self.color_player(player)))
+                self.ge.cube.set_animator(pos, BlinkAnimator(self.ge.player_color(self.cubestate[pos]), self.ge.player_color(player)))
 
     def process_playerN_plays(self, event):
         if event == 'state:enter':
@@ -96,7 +88,7 @@ class Game:
                     if v != -1 and v == self.cubestate[l[1]] and v == self.cubestate[l[2]] and v == self.cubestate[l[3]]:
                         win = True
                         for p in l:
-                            self.ge.cube.set_animator(p, BlinkAnimator(self.color_player(v)))
+                            self.ge.cube.set_animator(p, BlinkAnimator(self.ge.player_color(v)))
                 self.change_player()
                 self.ge.timer_add(0, 20)
                 self.ge.change_state(self.process_end_game if win else self.process_playerN_plays)
@@ -110,7 +102,7 @@ class Game:
                 self.ge.cube.set_animator(coord_3d_to_linear(i, y, z), BlinkAnimator((255, 0, 0)) if x_axis else StillAnimator((255, 0, 0)))
                 self.ge.cube.set_animator(coord_3d_to_linear(x, i, z), BlinkAnimator((0, 255, 0)) if y_axis else StillAnimator((0, 255, 0)))
                 self.ge.cube.set_animator(coord_3d_to_linear(x, y, i), BlinkAnimator((0, 0, 255)) if z_axis else StillAnimator((0, 0, 255)))
-            self.ge.cube.set_animator(coord_3d_to_linear(x, y, z), BlinkAnimator(self.color_player(self.curplayer)))
+            self.ge.cube.set_animator(coord_3d_to_linear(x, y, z), BlinkAnimator(self.ge.player_color(self.curplayer)))
 
         if event == 'state:enter': redraw()
         elif event == f'player{self.curplayer+1}:off': self.ge.change_state(self.process_playerN_plays)

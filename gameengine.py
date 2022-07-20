@@ -6,6 +6,10 @@ class GameEngine:
         self.cube = cube
         self.r1 = r1
         self.r2 = r2
+        self.player_colors = [
+            ((0, 0, 255), (0, 128, 255)),
+            ((255, 0, 0), (255, 128, 0))
+        ]
         self._state = self.nullstate
         self._timers = []
         try:
@@ -28,6 +32,10 @@ class GameEngine:
 
     def timer_rm(self, n):
         self._timers = [x for x in self._timers if x[1] != n]
+
+    def player_color(self, p, mod=False):
+        if not p in (0, 1): return (0, 0, 0)
+        return self.player_colors[p][mod]
 
     def process(self, rawevent):
         def button_name(data):
