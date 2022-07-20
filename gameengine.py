@@ -7,9 +7,14 @@ class GameEngine:
         self.r1 = r1
         self.r2 = r2
         self.player_colors = [
-            ((0, 0, 255), (0, 128, 255)),
-            ((255, 0, 0), (255, 128, 0))
+            ((255, 0, 0), (127, 0, 0)),
+            ((0, 255, 0), (0, 127, 0)),
+            ((0, 0, 255), (0, 0, 127)),
+            ((0, 255, 255), (0, 127, 127)),
+            ((255, 0, 255), (127, 0, 127)),
+            ((255, 255, 0), (127, 127, 0)),
         ]
+        self.player_colors_sel = [3, 5]
         self._state = self.nullstate
         self._timers = []
         try:
@@ -35,7 +40,8 @@ class GameEngine:
 
     def player_color(self, p, mod=False):
         if not p in (0, 1): return (0, 0, 0)
-        return self.player_colors[p][mod]
+        c = self.player_colors_sel[p]
+        return self.player_colors[c][mod]
 
     def process(self, rawevent):
         def button_name(data):
