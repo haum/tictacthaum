@@ -34,6 +34,14 @@ class Remote:
     def get_events(self):
         return self.s.recv(1000).strip().split() if self.s else []
 
+    def set_leds(self, l1, l2, l3):
+        if not self.s: return
+        v = 0
+        if l1: v += 1
+        if l2: v += 2
+        if l3: v += 4
+        self.s.send((str(v)+'\n').encode())
+
 
 class BlinkAnimator:
     def __init__(self, color, color2=(0,0,0), period=1):
