@@ -82,9 +82,9 @@ class Game:
             self.set_blink(self.position[self.curplayer], self.curplayer)
             self.ge.timer_add(0, 20)
 
-        elif event.startswith(f'player{self.curplayer+1}:button:'):
+        elif event.startswith(f'player{self.curplayer+1}:'):
             self.set_blink(self.position[self.curplayer], None)
-            btn = event[15:]
+            btn = event[8:]
 
             if btn in ('show', 'show_x', 'show_y', 'show_z'): return self.ge.change_state(self.process_show_xyz)
             elif btn == 'x+': self.position[self.curplayer] = self.position_change(self.position[self.curplayer], dx=1)
@@ -121,13 +121,13 @@ class Game:
             self.ge.cube.set_animator(coord_3d_to_linear(x, y, z), BlinkAnimator(self.color_player(self.curplayer)))
 
         if event == 'state:enter': redraw()
-        elif event == f'player{self.curplayer+1}:button:off': self.ge.change_state(self.process_playerN_plays)
-        elif event == f'player{self.curplayer+1}:button:show_x': redraw(x_axis=True)
-        elif event == f'player{self.curplayer+1}:button:show_y': redraw(y_axis=True)
-        elif event == f'player{self.curplayer+1}:button:show_z': redraw(z_axis=True)
-        elif event == f'player{self.curplayer+1}:button:show': redraw()
+        elif event == f'player{self.curplayer+1}:off': self.ge.change_state(self.process_playerN_plays)
+        elif event == f'player{self.curplayer+1}:show_x': redraw(x_axis=True)
+        elif event == f'player{self.curplayer+1}:show_y': redraw(y_axis=True)
+        elif event == f'player{self.curplayer+1}:show_z': redraw(z_axis=True)
+        elif event == f'player{self.curplayer+1}:show': redraw()
 
     def process_end_game(self, event):
-        if event == 'player1:button:valid' or event == 'player2:button:valid':
+        if event == 'player1:valid' or event == 'player2:valid':
             self.reset_game()
             self.ge.change_state(self.process_playerN_plays)

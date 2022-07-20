@@ -59,11 +59,11 @@ class GameEngine:
         elif rawevent[0] == 'remote1':
             btn = button_name(rawevent[1])
             if btn:
-                self._state('player1:button:'+btn)
+                self._state('player1:'+btn)
         elif rawevent[0] == 'remote2':
             btn = button_name(rawevent[1])
             if btn:
-                self._state('player2:button:'+btn)
+                self._state('player2:'+btn)
         elif rawevent[0] == 'console':
             if rawevent[1]:
                 self._state(rawevent[1])
