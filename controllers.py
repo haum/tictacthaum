@@ -2,6 +2,7 @@
 # -*- coding:utf8 -*-
 
 import socket
+import time
 
 class Cube:
     def __init__(self, tals_controller):
@@ -20,19 +21,38 @@ class Cube:
 class Remote:
     def __init__(self, ip):
         self.ip = ip
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) if ip else None
+        self.s = None
+        self.last_connect_try = 0
         self.connect()
 
     def connect(self):
-        if not self.s: return
-        self.s.connect((self.ip, 540))
-        self.s.recv(1000)
+        if not self.ip: return
+        if self.last_connect_try + 5 > time.time(): return
+        self.last_connect_try = time.time()
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            self.s.connect((self.ip, 540))
+            self.s.recv(1000)
+        except ConnectionRefusedError:
+            print('Remote connection error')
+            self.s.close()
+            self.s = None
+
+    def tic(self):
+        if self.ip and not self.s:
+            self.connect()
 
     def fd(self):
         return self.s
 
     def get_events(self):
-        return self.s.recv(1000).strip().split() if self.s else []
+        if not self.s: return []
+        v = self.s.recv(1000)
+        if v == b'':
+            print('Remote connection lost')
+            self.s.close()
+            self.s = None
+        return v.strip().split()
 
     def set_leds(self, l1, l2, l3):
         if not self.s: return
@@ -40,7 +60,12 @@ class Remote:
         if l1: v += 1
         if l2: v += 2
         if l3: v += 4
-        self.s.send((str(v)+'\n').encode())
+        try:
+            self.s.send((str(v)+'\n').encode())
+        except BrokenPipeError:
+            print('Remote connection lost')
+            self.s.close()
+            self.s = None
 
 
 class BlinkAnimator:

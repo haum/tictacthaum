@@ -29,6 +29,8 @@ while True:
     time.sleep(timestep)
     c.animate(timestep)
     ge.process(('tic', ))
+    r1.tic()
+    r2.tic()
 
     toread = select.select([a for a in (sys.stdin, r1.fd(), r2.fd()) if a], [], [], 0)[0]
     if r1.fd() in toread:
