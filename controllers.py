@@ -69,21 +69,22 @@ class Remote:
 
 
 class BlinkAnimator:
-    def __init__(self, color, color2=(0,0,0), period=1):
+    def __init__(self, color, color2=(0,0,0), period=1, duty_cycle=0.5, phase_percent=0):
         self.color = color
         self.color2 = color2
-        self.t = 0
+        self.t = phase_percent * period
         self.period = period
+        self.duty_cycle = duty_cycle
 
     def animate(self, dt):
         self.t += dt
         if self.t > self.period:
             self.t = 0
 
-        if self.t > self.period/2:
-            c = self.color
-        else:
+        if self.t > self.duty_cycle * self.period:
             c = self.color2
+        else:
+            c = self.color
         return c
 
 
