@@ -3,6 +3,11 @@ import time
 from controllers import StillAnimator
 from utils import coord_3d_to_linear
 
+games = {
+    'tictactoe': (255, 0, 0),
+    'paintball': (0, 255, 0),
+}
+
 class GameEngine:
     def __init__(self, cube, r1, r2, game):
         self.cube = cube
@@ -58,9 +63,21 @@ class GameEngine:
             for p in (coord_3d_to_linear(3, 3, 3), coord_3d_to_linear(2, 3, 3), coord_3d_to_linear(3, 2, 3), coord_3d_to_linear(3, 3, 2)):
                 self.cube.set_animator(p, StillAnimator(self.player_color(1)))
 
+        def drawgame():
+            for p in (coord_3d_to_linear(3, 0, 0), coord_3d_to_linear(0, 3, 0), coord_3d_to_linear(0, 0, 3)):
+                self.cube.set_animator(p, StillAnimator(games[self.game]))
+
         if event == 'state:enter':
             draw0()
             draw1()
+            drawgame()
+
+        elif event == 'player1:show' or event == 'player2:show':
+            gs = list(games.keys())
+            i = gs.index(self.game)
+            i = (i + 1) % len(gs)
+            self.game = gs[i]
+            drawgame()
 
         elif event == 'player1:valid' or event == 'player2:valid':
             load_game()
