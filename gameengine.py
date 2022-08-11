@@ -6,6 +6,7 @@ from utils import coord_3d_to_linear
 games = {
     'tictactoe': (255, 0, 0),
     'paintball': (0, 255, 0),
+    'animatic': (0, 0, 255),
 }
 
 class GameEngine:
