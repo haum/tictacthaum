@@ -27,6 +27,8 @@ class GameEngine:
         self._state = self.nullstate
         self.change_state(self.process_config)
         self._timers = []
+        self.reset1 = False
+        self.reset2 = False
 
     def nullstate(self, event):
         pass
@@ -69,6 +71,7 @@ class GameEngine:
                 self.cube.set_animator(p, StillAnimator(games[self.game]))
 
         if event == 'state:enter':
+            for i in range(64): self.cube.set_animator(i, StillAnimator((0, 0, 0)))
             draw0()
             draw1()
             drawgame()
@@ -122,16 +125,31 @@ class GameEngine:
             for t, n in self._timers:
                 if t <= now:
                     removable = True
-                    self._state(f'timer:{n}')
+                    if n == 'gameengine_reset1':
+                        if self.reset1:
+                            self.timer_rm('gameengine_reset1')
+                            self.timer_rm('gameengine_reset2')
+                            self.change_state(self.process_config)
+                    elif n == 'gameengine_reset2':
+                        if self.reset2:
+                            self.timer_rm('gameengine_reset1')
+                            self.timer_rm('gameengine_reset2')
+                            self.change_state(self.process_config)
+                    else:
+                        self._state(f'timer:{n}')
             if removable:
                 self._timers = [x for x in self._timers if x[0] > now]
 
         elif rawevent[0] == 'remote1':
             btn = button_name(rawevent[1])
+            self.reset1 = rawevent[1] == b'64'
+            if self.reset1: self.timer_add('gameengine_reset1', 5)
             if btn:
                 self._state('player1:'+btn)
         elif rawevent[0] == 'remote2':
             btn = button_name(rawevent[1])
+            self.reset2 = rawevent[1] == b'64'
+            if self.reset2: self.timer_add('gameengine_reset2', 5)
             if btn:
                 self._state('player2:'+btn)
         elif rawevent[0] == 'console':
