@@ -64,13 +64,13 @@ class Game:
             asev('anim:start')
 
         elif event == 'player1:z+' or event == 'player2:z+':
-            self.period -= 0.1
+            self.period /= 2
             if self.period < 0.5: self.period = 0.5
             asev('anim:redraw')
 
         elif event == 'player1:z-' or event == 'player2:z-':
-            self.period += 0.1
-            if self.period > 15: self.period = 15
+            self.period *= 2
+            if self.period > 16: self.period = 16
             asev('anim:redraw')
 
         elif event.startswith('timer:'):
