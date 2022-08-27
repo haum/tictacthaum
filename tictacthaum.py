@@ -25,6 +25,9 @@ r1 = Remote(args.remote1)
 r2 = Remote(args.remote2)
 ge = GameEngine(c, r1, r2, args.game)
 
+def stdin():
+    return sys.stdin if sys.stdin.isatty() else None
+
 while True:
     time.sleep(timestep)
     c.animate(timestep)
@@ -32,7 +35,7 @@ while True:
     r1.tic()
     r2.tic()
 
-    toread = select.select([a for a in (sys.stdin, r1.fd(), r2.fd()) if a], [], [], 0)[0]
+    toread = select.select([a for a in (stdin(), r1.fd(), r2.fd()) if a], [], [], 0)[0]
     if r1.fd() in toread:
         for e in r1.get_events():
             ge.process(('remote1', e))
