@@ -62,6 +62,7 @@ class Game:
 
         elif event == 'timer:0':
             self.set_blink(self.position[self.curplayer], None)
+            self.ge.sound.play('ping2')
             self.change_player()
             self.set_blink(self.position[self.curplayer], self.curplayer)
             self.ge.timer_add(0, 20)
@@ -89,6 +90,7 @@ class Game:
                         win = True
                         for p in l:
                             self.ge.cube.set_animator(p, BlinkAnimator(self.ge.player_color(v)))
+                self.ge.sound.play('ping')
                 self.change_player()
                 self.ge.timer_add(0, 20)
                 self.ge.change_state(self.process_end_game if win else self.process_playerN_plays)
@@ -115,6 +117,7 @@ class Game:
         if event == 'state:enter':
             self.ge.r1.set_leds(False, False, False)
             self.ge.r2.set_leds(False, False, False)
+            self.ge.sound.play('end')
 
         elif event == 'player1:valid' or event == 'player2:valid':
             self.reset_game()

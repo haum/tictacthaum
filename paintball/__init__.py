@@ -55,6 +55,9 @@ class Game:
             self.cubestate[self.position[1]] = 1
 
     def process_end_game(self, event):
-        if event == 'player1:valid' or event == 'player2:valid':
+        if event == 'state:enter':
+            self.ge.sound.play('end')
+
+        elif event == 'player1:valid' or event == 'player2:valid':
             self.reset_game()
             self.ge.change_state(self.process_play)
