@@ -10,8 +10,9 @@ games = {
 }
 
 class GameEngine:
-    def __init__(self, cube, r1, r2, game):
+    def __init__(self, cube, r1, r2, sound, game):
         self.cube = cube
+        self.sound = sound
         self.r1 = r1
         self.r2 = r2
         self.game = game

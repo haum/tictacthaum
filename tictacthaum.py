@@ -9,6 +9,7 @@ import time
 from utils import coord_3d_to_linear
 from controllers import Cube, Remote, BlinkAnimator, StillAnimator
 from gameengine import GameEngine
+from soundeffect import SoundEffect
 from legacy import TalController
 
 parser = argparse.ArgumentParser(description='Tic Tac THaum')
@@ -23,7 +24,8 @@ tc = TalController()
 c = Cube(tc)
 r1 = Remote(args.remote1)
 r2 = Remote(args.remote2)
-ge = GameEngine(c, r1, r2, args.game)
+se = SoundEffect()
+ge = GameEngine(c, r1, r2, se, args.game)
 
 def stdin():
     return sys.stdin if sys.stdin.isatty() else None
