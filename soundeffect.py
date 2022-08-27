@@ -1,7 +1,13 @@
-import pyglet
+try:
+    import pyglet
+except ModuleNotFoundError:
+    pyglet = False
 
 class SoundEffect:
     def __init__(self):
+        if not pyglet:
+            self.sounds = {}
+            return
         pyglet.resource.path = ['./']
         pyglet.resource.reindex()
         self.sounds = {
