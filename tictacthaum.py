@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser(description='Tic Tac THaum')
 parser.add_argument('-r1', '--remote1', help='Number of first remote')
 parser.add_argument('-r2', '--remote2', help='Number of second remote')
 parser.add_argument('-g', '--game', default='tictactoe', help='Game name')
+parser.add_argument('-s', '--no-sound', dest='nosound', default=False, action='store_true', help='Disable sound')
 args = parser.parse_args()
 
 timestep = 1/30
@@ -24,7 +25,7 @@ tc = TalController()
 c = Cube(tc)
 r1 = Remote(args.remote1)
 r2 = Remote(args.remote2)
-se = SoundEffect()
+se = SoundEffect(args.nosound)
 ge = GameEngine(c, r1, r2, se, args.game)
 
 def stdin():
