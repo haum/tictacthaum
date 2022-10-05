@@ -24,4 +24,4 @@ class SoundEffect:
 
     def play(self, n):
         if n in self.sounds:
-            self.sounds[n].play()
+            self.play(self.sounds[n])
