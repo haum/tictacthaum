@@ -33,7 +33,7 @@ class SoundEffect:
         self.q.put(None)
 
     def _thread_loop(self):
-        print('Sound thread: start')
+        print('Sound thread: begin')
         while True:
             s = self.q.get()
             if s in self.sounds:
