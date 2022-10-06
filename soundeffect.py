@@ -1,3 +1,6 @@
+import threading
+import queue
+
 sound_lib = True
 try:
     from pydub import AudioSegment
@@ -18,7 +21,23 @@ class SoundEffect:
             'ping2': AudioSegment.from_ogg('ping2.ogg'),
             'end': AudioSegment.from_ogg('end.ogg'),
         }
+        self.q = queue.Queue()
+        self.thread = threading.Thread(target=self._thread_loop)
+        self.thread.start()
 
     def play(self, n):
-        if n in self.sounds:
-            play(self.sounds[n])
+        if n in self.sounds and self.thread.is_alive():
+            self.q.put(n)
+
+    def stop(self):
+        self.q.put(None)
+
+    def _thread_loop(self):
+        print('Sound thread: start')
+        while True:
+            s = self.q.get()
+            if s in self.sounds:
+                play(self.sounds[s])
+            self.q.task_done()
+            if s is None: break
+        print('Sound thread: end')
