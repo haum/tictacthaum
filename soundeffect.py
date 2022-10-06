@@ -1,9 +1,6 @@
 sound_lib = True
 try:
     from pydub import AudioSegment
-except ModuleNotFoundError:
-    sound_lib = False
-try:
     from pydub.playback import play
 except ModuleNotFoundError:
     sound_lib = False
